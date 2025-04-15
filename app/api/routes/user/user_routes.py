@@ -56,7 +56,7 @@ async def signup(request: SignInRequest, db: AsyncSession = Depends(get_db)):
 async def refresh_token(token_details: HTTPAuthorizationCredentials = Depends(access_token_bearer)):
     try:
         print("token_details " + token_details.credentials)
-        payload = jwt.decode(token_details.credentials, Config.JWT_SECRET_KEY, algorithms=Config.ALGORITHM)
+        payload = jwt.decode(token_details.credentials, Config.JWT_REFRESH_SECRET_KEY, algorithms=Config.ALGORITHM)
         user_id = payload.get('sub')
         if datetime.fromtimestamp(payload.get('exp')) < datetime.now():
             raise HTTPException(
@@ -74,8 +74,3 @@ async def refresh_token(token_details: HTTPAuthorizationCredentials = Depends(ac
     return JSONResponse(status_code=status.HTTP_200_OK, content={
         "refresh_token": refresh_token
     })
-
-
-@user_router.get("/user")
-async def get_user(user=Depends(get_current_user)):
-    return user
