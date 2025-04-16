@@ -6,7 +6,7 @@ from sqlmodel import SQLModel, Field, Relationship
 
 class Warehouse(SQLModel, table=True):
     __tablename__ = "warehouses"
-    id: uuid.UUID = Field(primary_key=True, default=uuid.uuid4())
+    id: uuid.UUID = Field(primary_key=True, default_factory=uuid.uuid4)
     name: str
     address: Optional[str] = None
 
