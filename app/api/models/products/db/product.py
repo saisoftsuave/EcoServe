@@ -6,7 +6,7 @@ from sqlmodel import SQLModel, Field, Relationship
 
 class Product(SQLModel, table=True):
     __tablename__ = "products"
-    id: uuid.UUID = Field(primary_key=True, default=uuid.uuid4())
+    id: uuid.UUID = Field(primary_key=True, default_factory=uuid.uuid4)
     name: str
     description: Optional[str] = None
     price: float

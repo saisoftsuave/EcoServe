@@ -5,7 +5,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.models.products import ProductCategory
 from app.api.models.products.category_request import CategoryCreate
-from app.api.routes.products.category_service import create_category_service
+from app.api.services.category_service import create_category_service
 from app.api.routes.user.user_service import get_current_user
 from app.core.db import get_db
 
