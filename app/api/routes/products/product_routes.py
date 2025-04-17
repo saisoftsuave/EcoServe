@@ -5,7 +5,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.models.products.db.product import Product
 from app.api.models.products.product_request import ProductCreate, ProductUpdate
-from app.api.routes.products.product_service import create_product_service, \
+from app.api.services.product_service import create_product_service, \
     get_product_service, get_products_service, update_product_service, delete_product_service
 from app.api.routes.user.user_service import get_current_user
 from app.core.db import get_db

@@ -19,14 +19,14 @@ async def create_product_service(db: AsyncSession, product: ProductCreate) -> Pr
     return product_model
 
 
-async def get_product_service(db: AsyncSession, product_id: int) -> Optional[Product]:
+async def get_product_service(db: AsyncSession, product_id: str) -> Optional[Product]:
     return await db.get(Product, product_id)
 
 async def get_products_service(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[Product]:
     products = await db.execute(statement=select(Product).offset(skip).limit(limit))
     return products.scalars().all()
 
-async def update_product_service(db: AsyncSession, product_id: int, product_update: ProductUpdate) -> Optional[Product]:
+async def update_product_service(db: AsyncSession, product_id: str, product_update: ProductUpdate) -> Optional[Product]:
     product = db.get(Product, product_id)
     if product:
         for key, value in product_update.dict(exclude_unset=True).items():
@@ -40,7 +40,7 @@ async def update_product_service(db: AsyncSession, product_id: int, product_upda
         return product
     return None
 
-async def delete_product_service(db: AsyncSession, product_id: int) -> Optional[Product]:
+async def delete_product_service(db: AsyncSession, product_id: str) -> Optional[Product]:
     product = db.get(Product, product_id)
     if product:
         await db.delete(product)
