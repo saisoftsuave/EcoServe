@@ -5,7 +5,7 @@ from sqlmodel import SQLModel, Field, Relationship
 
 class Inventory(SQLModel, table=True):
     __tablename__ = "inventories"
-    id: uuid.UUID = Field(primary_key=True, default=uuid.uuid4())
+    id: uuid.UUID = Field(primary_key=True, default_factory=uuid.uuid4)
     product_id: uuid.UUID = Field(foreign_key="products.id")
     warehouse_id: uuid.UUID = Field(foreign_key="warehouses.id")
     quantity: int

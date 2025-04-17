@@ -5,7 +5,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.models.products import Inventory
 from app.api.services.Inventory_service import InventoryCreate, create_inventory_service, get_inventory_service, \
-    get_inventories_service, update_inventory_service, delete_inventory_service
+    get_inventories_service, update_inventory_service, delete_inventory_service, InventoryUpdate
 from app.core.db import get_db
 
 inventory_router = APIRouter(prefix="/inventory", tags=["Inventory"])

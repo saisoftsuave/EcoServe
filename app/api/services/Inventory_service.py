@@ -5,13 +5,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.models.products import Product, Inventory
 from app.api.services.warehouse_service import Warehouse
-#
-#
-# class Inventory(SQLModel, table=True):
-#     id: Optional[int] = Field(default=None, primary_key=True)
-#     product_id: int = Field(foreign_key="product.id")
-#     warehouse_id: int = Field(foreign_key="warehouse.id")
-#     quantity: int
+
 
 class InventoryCreate(SQLModel):
     product_id: int
@@ -24,15 +18,15 @@ class InventoryUpdate(SQLModel):
     quantity: Optional[int] = None
 
 # Create
-def create_inventory_service(db: AsyncSession, inventory: InventoryCreate) -> Inventory:
+async def create_inventory_service(db: AsyncSession, inventory: InventoryCreate) -> Inventory:
     if not db.get(Product, inventory.product_id):
         raise ValueError("Product not found")
     if not db.get(Warehouse, inventory.warehouse_id):
         raise ValueError("Warehouse not found")
     inventory_model = Inventory(**inventory.dict())
     db.add(inventory_model)
-    db.commit()
-    db.refresh(inventory_model)
+    await db.commit()
+    await db.refresh(inventory_model)
     return inventory_model
 
 # Read One
