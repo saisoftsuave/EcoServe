@@ -9,7 +9,7 @@ from app.api.utils.password_utils import get_hashed_password
 
 class User(SQLModel, table=True):
     __tablename__ = "User"
-    id: uuid.UUID = Field(primary_key=True, default=uuid.uuid4())
+    id: uuid.UUID = Field(primary_key=True, default_factory=uuid.uuid4)
     email: str = Field(min_length=3, regex=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[A-Za-z]{2,}$', unique=True)
     hashed_password: str
     first_name: str = Field(min_length=2, max_length=26, regex=r"^[A-Za-z\\s'-]{1,100}$")
