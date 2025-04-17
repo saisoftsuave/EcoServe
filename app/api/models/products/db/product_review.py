@@ -7,7 +7,7 @@ from sqlmodel import SQLModel, Field, Relationship
 
 class Review(SQLModel, table=True):
     __tablename__ = "reviews"
-    id: uuid.UUID = Field(primary_key=True, default=uuid.uuid4())
+    id: uuid.UUID = Field(primary_key=True, default_factory=uuid.uuid4)
     product_id: uuid.UUID = Field(foreign_key="products.id")
     reviewer_id: uuid.UUID = Field(foreign_key="User.id")
     rating: int
