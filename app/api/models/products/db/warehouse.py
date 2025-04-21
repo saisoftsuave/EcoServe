@@ -11,4 +11,4 @@ class Warehouse(SQLModel, table=True):
     address: Optional[str] = None
 
 
-    inventories: List["Inventory"] = Relationship(back_populates="warehouse")
+    inventories: List["Inventory"] = Relationship(back_populates="warehouse",sa_relationship_kwargs={"lazy": "selectin"})
