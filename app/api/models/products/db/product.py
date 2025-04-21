@@ -13,8 +13,8 @@ class Product(SQLModel, table=True):
     category_id: int = Field(foreign_key="product_categories.id")
 
 
-    category: Optional["ProductCategory"] = Relationship(back_populates="products")
-    images: List["ProductImage"] = Relationship(back_populates="product")
-    reviews: List["Review"] = Relationship(back_populates="product")
-    inventories: List["Inventory"] = Relationship(back_populates="product")
+    category: Optional["ProductCategory"] = Relationship(back_populates="products",sa_relationship_kwargs={"lazy": "selectin"})
+    images: List["ProductImage"] = Relationship(back_populates="product",sa_relationship_kwargs={"lazy": "selectin"})
+    reviews: List["Review"] = Relationship(back_populates="product",sa_relationship_kwargs={"lazy": "selectin"})
+    inventories: List["Inventory"] = Relationship(back_populates="product",sa_relationship_kwargs={"lazy": "selectin"})
 

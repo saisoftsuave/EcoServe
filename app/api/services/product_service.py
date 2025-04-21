@@ -22,9 +22,18 @@ async def create_product_service(db: AsyncSession, product: ProductCreate) -> Pr
 async def get_product_service(db: AsyncSession, product_id: str) -> Optional[Product]:
     return await db.get(Product, product_id)
 
+
 async def get_products_service(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[Product]:
     products = await db.execute(statement=select(Product).offset(skip).limit(limit))
     return products.scalars().all()
+
+
+async def get_products_by_name_service(db: AsyncSession, name_filter: str, skip: int = 0, limit: int = 100) -> List[
+    Product]:
+    statement = select(Product).where(Product.name.ilike(f"%{name_filter}%")).offset(skip).limit(limit)
+    products = await db.execute(statement)
+    return products.scalars().all()
+
 
 async def update_product_service(db: AsyncSession, product_id: str, product_update: ProductUpdate) -> Optional[Product]:
     product = db.get(Product, product_id)
@@ -39,6 +48,7 @@ async def update_product_service(db: AsyncSession, product_id: str, product_upda
         await db.refresh(product)
         return product
     return None
+
 
 async def delete_product_service(db: AsyncSession, product_id: str) -> Optional[Product]:
     product = db.get(Product, product_id)
