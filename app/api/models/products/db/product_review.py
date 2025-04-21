@@ -14,5 +14,5 @@ class Review(SQLModel, table=True):
     review_message: Optional[str] = None
 
 
-    product: Optional["Product"] = Relationship(back_populates="reviews")
-    reviewer: Optional["User"] = Relationship(back_populates="reviews")
+    product: Optional["Product"] = Relationship(back_populates="reviews",sa_relationship_kwargs={"lazy": "selectin"})
+    reviewer: Optional["User"] = Relationship(back_populates="reviews",sa_relationship_kwargs={"lazy": "selectin"})

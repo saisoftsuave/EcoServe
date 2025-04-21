@@ -12,4 +12,4 @@ class ProductImage(SQLModel, table=True):
     primary_image: bool = Field(default=False)
 
 
-    product: Optional["Product"] = Relationship(back_populates="images")
+    product: Optional["Product"] = Relationship(back_populates="images",sa_relationship_kwargs={"lazy": "selectin"})
