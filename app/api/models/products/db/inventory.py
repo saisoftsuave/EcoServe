@@ -11,5 +11,5 @@ class Inventory(SQLModel, table=True):
     quantity: int
 
 
-    product: Optional["Product"] = Relationship(back_populates="inventories")
-    warehouse: Optional["Warehouse"] = Relationship(back_populates="inventories")
+    product: Optional["Product"] = Relationship(back_populates="inventories",sa_relationship_kwargs={"lazy": "selectin"})
+    warehouse: Optional["Warehouse"] = Relationship(back_populates="inventories",sa_relationship_kwargs={"lazy": "selectin"})
