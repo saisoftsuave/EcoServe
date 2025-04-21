@@ -7,4 +7,4 @@ class ProductCategory(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True, sa_column_kwargs={'autoincrement': True})
     name: str
 
-    products: List["Product"] = Relationship(back_populates="category")
+    products: List["Product"] = Relationship(back_populates="category",sa_relationship_kwargs={"lazy": "selectin"})
