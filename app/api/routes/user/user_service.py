@@ -11,7 +11,6 @@ from sqlmodel import select
 from app.api.models.user.db.user import to_user, User
 from app.api.models.user.signup_request import SignUpRequest
 from app.api.utils.password_utils import verify_password
-from app.api.utils.token_utils import JWT_SECRET_KEY, ALGORITHM
 from app.core.access_token_barrier import AccessTokenBearer
 from app.core.config import Config
 from app.core.db import get_db
