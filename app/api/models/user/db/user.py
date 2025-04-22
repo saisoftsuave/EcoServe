@@ -16,7 +16,8 @@ class User(SQLModel, table=True):
     last_name: str = Field(min_length=2, max_length=26, regex=r"^[A-Za-z\\s'-]{1,100}$")
 
     session: "Session" = Relationship(back_populates="user", sa_relationship_kwargs={"lazy": "selectin"})
-    reviews: List["Review"] = Relationship(back_populates="reviewer")
+    reviews: List["Review"] = Relationship(back_populates="reviewer",sa_relationship_kwargs={"lazy": "selectin"})
+    cart: List["Cart"] = Relationship(back_populates="user",sa_relationship_kwargs={"lazy": "selectin"})
 
 
 
