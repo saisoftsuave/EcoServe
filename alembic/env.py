@@ -17,6 +17,7 @@ from app.api.models.products.db.product import Product
 from app.api.models.products.db.product_category import ProductCategory
 from app.api.models.products.db.product_image import ProductImage
 from app.api.models.products.db.warehouse import Warehouse
+from app.api.models.cart.db.cart import Cart
 
 
 # this is the Alembic Config object, which provides
