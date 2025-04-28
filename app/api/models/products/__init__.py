@@ -5,3 +5,5 @@ from app.api.models.products.db.warehouse import Warehouse
 from app.api.models.products.db.product_image import ProductImage
 from app.api.models.products.db.inventory import Inventory
 from app.api.models.cart.db.cart import Cart
+from app.api.models.orders.db.order import Order
+from app.api.models.orders.db.order_item import OrderItem
