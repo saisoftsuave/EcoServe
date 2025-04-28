@@ -2,10 +2,8 @@ import uuid
 from typing import List
 
 from sqlmodel import SQLModel, Field, Relationship
-
 from app.api.models.user.signup_request import SignUpRequest
 from app.api.utils.password_utils import get_hashed_password
-
 
 class User(SQLModel, table=True):
     __tablename__ = "User"
@@ -16,11 +14,9 @@ class User(SQLModel, table=True):
     last_name: str = Field(min_length=2, max_length=26, regex=r"^[A-Za-z\\s'-]{1,100}$")
 
     session: "Session" = Relationship(back_populates="user", sa_relationship_kwargs={"lazy": "selectin"})
-    reviews: List["Review"] = Relationship(back_populates="reviewer",sa_relationship_kwargs={"lazy": "selectin"})
-    cart: List["Cart"] = Relationship(back_populates="user",sa_relationship_kwargs={"lazy": "selectin"})
-
-
-
+    reviews: List["Review"] = Relationship(back_populates="reviewer", sa_relationship_kwargs={"lazy": "selectin"})
+    cart: List["Cart"] = Relationship(back_populates="user", sa_relationship_kwargs={"lazy": "selectin"})
+    orders: List["Order"] = Relationship(back_populates="user", sa_relationship_kwargs={"lazy": "selectin"})
 
 def to_user(signup_request: SignUpRequest) -> User:
     return User(
