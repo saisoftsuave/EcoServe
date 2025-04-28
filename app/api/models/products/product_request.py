@@ -8,6 +8,7 @@ class ProductCreate(SQLModel):
     description: Optional[str] = None
     price: float
     category_id: int
+    image:str
 
 class ProductUpdate(SQLModel):
     name: Optional[str] = None
