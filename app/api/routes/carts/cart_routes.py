@@ -70,11 +70,11 @@ async def update_product(cart_id: str, cart_update: UpdateCartQuantity, db: Asyn
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@cart_router.get("/", response_model=List[Product], status_code=200)
+@cart_router.get("/", response_model=List[Cart], status_code=200)
 async def get_cart(db: AsyncSession = Depends(get_db), user=Depends(get_current_user)):
     try:
         result = await get_cart_service(db, user.id)
-        price = sum(i.price for i in result)
+        # price = sum(i.price for i in result)
         return result
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))

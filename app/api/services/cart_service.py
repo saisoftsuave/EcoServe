@@ -43,5 +43,5 @@ async def get_cart_service(db: AsyncSession, user_id: str) -> List[Product]:
     db_user = await db.get(User,user_id)
     if not db_user:
         raise UserNotFound()
-    products = [cart_item.product for cart_item in db_user.cart]
+    products = [cart_item for cart_item in db_user.cart]
     return products
