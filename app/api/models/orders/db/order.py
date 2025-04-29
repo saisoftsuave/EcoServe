@@ -16,3 +16,4 @@ class Order(SQLModel, table=True):
 
     user: Optional["User"] = Relationship(back_populates="orders", sa_relationship_kwargs={"lazy": "selectin"})
     order_items: List["OrderItem"] = Relationship(back_populates="order", sa_relationship_kwargs={"lazy": "selectin"})
+    payment: Optional["Payment"] = Relationship(back_populates="order", sa_relationship_kwargs={"lazy": "selectin"})
