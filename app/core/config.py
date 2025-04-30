@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     AWS_REGION: str
     S3_BUCKET_NAME: str
     S3_FOLDER_NAME: str
+    STRIPE_WEBHOOK_SECRET:str
+    STRIPE_API_KEY:str
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

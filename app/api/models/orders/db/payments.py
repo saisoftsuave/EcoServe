@@ -26,4 +26,4 @@ class Payment(SQLModel, table=True):
     # Id generated from strip payment gateway
     # stripe_id:str
 
-    order: Optional["Order"] = Relationship(back_populates="payment", sa_relationship_kwargs={"lazy": "selectin"})
+    order: Optional["Order"] = Relationship(back_populates="payments", sa_relationship_kwargs={"lazy": "selectin"})

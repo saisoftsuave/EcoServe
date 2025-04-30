@@ -20,6 +20,7 @@ from app.api.models.products.db.warehouse import Warehouse
 from app.api.models.cart.db.cart import Cart
 from app.api.models.orders.db.order import Order
 from app.api.models.orders.db.order_item import OrderItem
+from app.api.models.orders.db.payments import Payment
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
