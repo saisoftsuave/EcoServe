@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, HTTPAuthorizationCredentials
 from jose import jwt
 from pydantic import ValidationError
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
@@ -25,6 +25,8 @@ async def create_new_user(user: SignUpRequest, db: AsyncSession):
         db.add(db_user)
         await db.commit()
         return f"Account created successfully with the email {user.email}"
+    except IntegrityError as e:
+        raise DataBaseException(detail=e.detail)
     except SQLAlchemyError as e:
         raise DataBaseException(detail=e)
 
