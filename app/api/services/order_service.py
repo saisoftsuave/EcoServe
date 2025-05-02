@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -11,93 +12,144 @@ from app.api.models.orders.db.order_item import OrderItem
 from app.api.models.orders.order_request import OrderUpdate
 from app.api.utils.order_status import OrderStatus
 
+# Custom exceptions
+class OrderServiceError(Exception):
+    """Base exception for order service operations."""
+    pass
+
+class OrderNotFoundError(OrderServiceError):
+    pass
+
+class OrderItemNotFoundError(OrderServiceError):
+    pass
+
+class DuplicateOrderItemError(OrderServiceError):
+    pass
+
 async def create_order_service(db: AsyncSession, cart_data: List[Cart], user_id: str) -> Order:
+    # Calculate total and create order
+    total = sum(item.quantity * item.unit_price for item in cart_data)
     db_order = Order(
         user_id=user_id,
-        total_amount=sum(item.quantity * 10 for item in cart_data),  # Assuming unit_price=10 as in original
+        total_amount=total,
         status=OrderStatus.PENDING,
-        address_id=""
+        address_id="",
+        created_at=datetime.utcnow()
     )
-
     db.add(db_order)
-    await db.commit()
-    await db.refresh(db_order)
+    try:
+        await db.commit()
+        await db.refresh(db_order)
+    except Exception:
+        await db.rollback()
+        raise OrderServiceError("Failed to create order")
 
-    order_items = [
-        OrderItem(
+    # Create order items
+    order_items = []
+    for item in cart_data:
+        oi = OrderItem(
             order_id=db_order.id,
             product_id=item.product_id,
             quantity=item.quantity,
-            unit_price=10
-        ) for item in cart_data
-    ]
-
+            unit_price=item.unit_price
+        )
+        order_items.append(oi)
     db.add_all(order_items)
-    await db.commit()
-
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise DuplicateOrderItemError("Duplicate order item detected")
+    except Exception:
+        await db.rollback()
+        raise OrderServiceError("Failed to save order items")
     return db_order
 
-async def get_order_service(db: AsyncSession, order_id: str) -> Optional[Order]:
-    result = await db.get(Order, order_id)
-    return result
+async def get_order_service(db: AsyncSession, order_id: UUID) -> Order:
+    order = await db.get(Order, order_id)
+    if not order:
+        raise OrderNotFoundError(f"Order id {order_id} not found")
+    return order
 
 async def get_orders_service(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[Order]:
-    statement = select(Order).offset(skip).limit(limit)
-    result = await db.exec(statement)
-    return result.all()
+    stmt = select(Order).offset(skip).limit(limit)
+    result = await db.execute(stmt)
+    return result.scalars().all()
 
-async def get_order_item_service(db: AsyncSession, order_id: UUID, item_id: UUID) -> Optional[OrderItem]:
-    statement = select(OrderItem).where(OrderItem.order_id == order_id, OrderItem.id == item_id)
-    result = await db.exec(statement)
-    return result.first()
+async def get_order_item_service(db: AsyncSession, order_id: UUID, item_id: UUID) -> OrderItem:
+    stmt = select(OrderItem).where(
+        OrderItem.order_id == order_id,
+        OrderItem.id == item_id
+    )
+    result = await db.execute(stmt)
+    item = result.scalar_one_or_none()
+    if not item:
+        raise OrderItemNotFoundError(f"OrderItem id {item_id} not found in order {order_id}")
+    return item
 
 async def update_order_item_service(
     db: AsyncSession,
     order_id: UUID,
     item_id: UUID,
     order_item_data: Cart
-) -> Optional[OrderItem]:
-    statement = select(OrderItem).where(OrderItem.order_id == order_id, OrderItem.id == item_id)
-    result = await db.exec(statement)
-    db_item = result.first()
-    if db_item:
-        update_data = order_item_data.dict(exclude_unset=True)
-        for key, value in update_data.items():
-            setattr(db_item, key, value)
-        db.add(db_item)
+) -> OrderItem:
+    # Fetch item
+    item = await get_order_item_service(db, order_id, item_id)
+    # Update fields
+    for key, value in order_item_data.dict(exclude_unset=True).items():
+        setattr(item, key, value)
+    db.add(item)
+    try:
         await db.commit()
-        await db.refresh(db_item)
-    return db_item
+        await db.refresh(item)
+    except Exception:
+        await db.rollback()
+        raise OrderServiceError("Failed to update order item")
+    return item
 
 async def delete_order_item_service(db: AsyncSession, order_id: UUID, item_id: UUID) -> bool:
-    statement = select(OrderItem).where(OrderItem.order_id == order_id, OrderItem.id == item_id)
-    result = await db.exec(statement)
-    db_item = result.first()
-    if db_item:
-        await db.delete(db_item)
+    # Fetch item
+    try:
+        item = await get_order_item_service(db, order_id, item_id)
+    except OrderItemNotFoundError:
+        return False
+    try:
+        await db.delete(item)
         await db.commit()
-        return True
-    return False
+    except Exception:
+        await db.rollback()
+        raise OrderServiceError("Failed to delete order item")
+    return True
 
-async def update_order_service(db: AsyncSession, order_id: UUID, order_update: OrderUpdate) -> Optional[Order]:
-    db_order = await db.get(Order, order_id)
-    if db_order:
-        if order_update.status:
-            db_order.status = order_update.status
-            db_order.updated_at = datetime.utcnow()
-        db.add(db_order)
+async def update_order_service(db: AsyncSession, order_id: UUID, order_update: OrderUpdate) -> Order:
+    order = await db.get(Order, order_id)
+    if not order:
+        raise OrderNotFoundError(f"Order id {order_id} not found")
+    if order_update.status:
+        order.status = order_update.status
+        order.updated_at = datetime.utcnow()
+    db.add(order)
+    try:
         await db.commit()
-        await db.refresh(db_order)
-    return db_order
+        await db.refresh(order)
+    except Exception:
+        await db.rollback()
+        raise OrderServiceError("Failed to update order")
+    return order
 
 async def delete_order_service(db: AsyncSession, order_id: UUID) -> bool:
     order = await db.get(Order, order_id)
-    if order:
-        statement = select(OrderItem).where(OrderItem.order_id == order_id)
-        order_items = await db.exec(statement)
-        for item in order_items:
+    if not order:
+        return False
+    try:
+        # Delete associated items first
+        stmt = select(OrderItem).where(OrderItem.order_id == order_id)
+        items = (await db.execute(stmt)).scalars().all()
+        for item in items:
             await db.delete(item)
         await db.delete(order)
         await db.commit()
-        return True
-    return False
+    except Exception:
+        await db.rollback()
+        raise OrderServiceError("Failed to delete order")
+    return True
