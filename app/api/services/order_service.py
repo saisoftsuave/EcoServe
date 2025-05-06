@@ -12,23 +12,28 @@ from app.api.models.orders.db.order_item import OrderItem
 from app.api.models.orders.order_request import OrderUpdate
 from app.api.utils.order_status import OrderStatus
 
+
 # Custom exceptions
 class OrderServiceError(Exception):
     """Base exception for order service operations."""
     pass
 
+
 class OrderNotFoundError(OrderServiceError):
     pass
+
 
 class OrderItemNotFoundError(OrderServiceError):
     pass
 
+
 class DuplicateOrderItemError(OrderServiceError):
     pass
 
+
 async def create_order_service(db: AsyncSession, cart_data: List[Cart], user_id: str) -> Order:
     # Calculate total and create order
-    total = sum(item.quantity * item.unit_price for item in cart_data)
+    total = sum(item.quantity * float(item.unit_price) for item in cart_data)
     db_order = Order(
         user_id=user_id,
         total_amount=total,
@@ -65,16 +70,19 @@ async def create_order_service(db: AsyncSession, cart_data: List[Cart], user_id:
         raise OrderServiceError("Failed to save order items")
     return db_order
 
+
 async def get_order_service(db: AsyncSession, order_id: UUID) -> Order:
     order = await db.get(Order, order_id)
     if not order:
         raise OrderNotFoundError(f"Order id {order_id} not found")
     return order
 
-async def get_orders_service(db: AsyncSession, skip: int = 0, limit: int = 100) -> List[Order]:
-    stmt = select(Order).offset(skip).limit(limit)
+
+async def get_orders_service(db: AsyncSession, user_id: str, skip: int = 0, limit: int = 100) -> List[Order]:
+    stmt = select(Order).where(Order.user_id == user_id).offset(skip).limit(limit)
     result = await db.execute(stmt)
     return result.scalars().all()
+
 
 async def get_order_item_service(db: AsyncSession, order_id: UUID, item_id: UUID) -> OrderItem:
     stmt = select(OrderItem).where(
@@ -87,11 +95,12 @@ async def get_order_item_service(db: AsyncSession, order_id: UUID, item_id: UUID
         raise OrderItemNotFoundError(f"OrderItem id {item_id} not found in order {order_id}")
     return item
 
+
 async def update_order_item_service(
-    db: AsyncSession,
-    order_id: UUID,
-    item_id: UUID,
-    order_item_data: Cart
+        db: AsyncSession,
+        order_id: UUID,
+        item_id: UUID,
+        order_item_data: Cart
 ) -> OrderItem:
     # Fetch item
     item = await get_order_item_service(db, order_id, item_id)
@@ -107,6 +116,7 @@ async def update_order_item_service(
         raise OrderServiceError("Failed to update order item")
     return item
 
+
 async def delete_order_item_service(db: AsyncSession, order_id: UUID, item_id: UUID) -> bool:
     # Fetch item
     try:
@@ -120,6 +130,7 @@ async def delete_order_item_service(db: AsyncSession, order_id: UUID, item_id: U
         await db.rollback()
         raise OrderServiceError("Failed to delete order item")
     return True
+
 
 async def update_order_service(db: AsyncSession, order_id: UUID, order_update: OrderUpdate) -> Order:
     order = await db.get(Order, order_id)
@@ -136,6 +147,7 @@ async def update_order_service(db: AsyncSession, order_id: UUID, order_update: O
         await db.rollback()
         raise OrderServiceError("Failed to update order")
     return order
+
 
 async def delete_order_service(db: AsyncSession, order_id: UUID) -> bool:
     order = await db.get(Order, order_id)
