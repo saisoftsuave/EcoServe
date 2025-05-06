@@ -7,7 +7,6 @@ from app.api.models.orders.db.payments import PaymentStatus
 
 class PaymentCreate(BaseModel):
     order_id: UUID
-    amount: float
     payment_method: str
 
 class PaymentUpdate(BaseModel):

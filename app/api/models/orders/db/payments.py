@@ -15,7 +15,7 @@ class PaymentStatus(str, Enum):
 
 class Payment(SQLModel, table=True):
     __tablename__ = "payments"
-    id: UUID = Field(primary_key=True, default_factory=uuid4)
+    id: UUID = Field(primary_key=True)
     order_id: UUID = Field(foreign_key="order.id")
     amount: float
     status: PaymentStatus = Field(default=PaymentStatus.PENDING)
