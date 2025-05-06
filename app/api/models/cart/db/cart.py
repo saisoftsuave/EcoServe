@@ -9,10 +9,10 @@ class Cart(SQLModel, table=True):
     user_id: uuid.UUID = Field(foreign_key="User.id")
     product_id: uuid.UUID = Field(foreign_key="products.id")
     quantity: int
+    unit_price: Optional[float]
 
     product: Optional["Product"] = Relationship(back_populates="cart", sa_relationship_kwargs={"lazy": "selectin"})
     user: Optional["User"] = Relationship(back_populates="cart", sa_relationship_kwargs={"lazy": "selectin"})
-
 
 # from sqlalchemy import Column, String, Integer, ForeignKey, DateTime, Numeric, func
 # from sqlalchemy.orm import relationship, declarative_base

@@ -33,7 +33,8 @@ async def add_to_cart_service(db: AsyncSession, cart_item: AddToCart) -> Cart:
     if not product:
         raise ProductNotFoundError("Product not found")
     # Create cart entry
-    cart_model = Cart(**cart_item.dict())
+    cart_model = Cart(**cart_item.__dict__)
+    cart_model.unit_price = product.price
     db.add(cart_model)
     try:
         await db.commit()
